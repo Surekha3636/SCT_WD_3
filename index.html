@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Programming Quiz App</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(to right, #ff9a9e, #fad0c4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .quiz-container {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        width: 420px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 15px;
+    }
+
+    .option {
+        margin: 8px 0;
+        text-align: left;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #ff6f91;
+        color: white;
+        width: 100%;
+        font-size: 15px;
+    }
+
+    button:hover {
+        background: #ff4f7a;
+    }
+
+    #result {
+        font-size: 20px;
+        margin-top: 20px;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="quiz-container">
+    <h2 id="question">Question</h2>
+    <div id="options"></div>
+    <button onclick="nextQuestion()">Next</button>
+    <div id="result"></div>
+</div>
+
+<script>
+
+const quizData = [
+    {type:"single",question:"Which language is procedural?",options:["Python","Java","C","Ruby"],answer:"C"},
+    {type:"single",question:"Which language uses JVM?",options:["C","Python","Java","Go"],answer:"Java"},
+    {type:"single",question:"Which language is dynamically typed?",options:["C","Java","Python","C++"],answer:"Python"},
+    {type:"single",question:"Which keyword defines a class in Java?",options:["class","define","struct","object"],answer:"class"},
+    {type:"single",question:"Which symbol ends a statement in C?",options:[".",",",";",":"],answer:";"},
+    {type:"single",question:"Which language is best for system programming?",options:["Python","Java","C","JavaScript"],answer:"C"},
+    {type:"single",question:"Which function prints output in Python?",options:["echo()","printf()","print()","cout"],answer:"print()"},
+    {type:"single",question:"Which keyword is used for inheritance in Java?",options:["inherits","extends","implements","using"],answer:"extends"},
+
+    {type:"multi",question:"Which are compiled languages?",options:["C","Java","Python","HTML"],answer:["C","Java"]},
+    {type:"multi",question:"Which support OOP?",options:["C","Java","Python","Assembly"],answer:["Java","Python"]},
+    {type:"multi",question:"Valid Python data types?",options:["int","float","char","list"],answer:["int","float","list"]},
+    {type:"multi",question:"Which are Java keywords?",options:["class","public","define","static"],answer:["class","public","static"]},
+    {type:"multi",question:"Which are loop types in C?",options:["for","while","repeat","do-while"],answer:["for","while","do-while"]},
+    {type:"multi",question:"Which are Python frameworks?",options:["Django","Flask","Spring","Laravel"],answer:["Django","Flask"]},
+
+    {type:"fill",question:"C program starts with ______ function.",answer:"main"},
+    {type:"fill",question:"Python uses ______ instead of braces.",answer:"indentation"},
+    {type:"fill",question:"Java is a ______ oriented language.",answer:"object"},
+    {type:"fill",question:"In C, ______ is used to print output.",answer:"printf"},
+    {type:"fill",question:"Python file extension is ______.",answer:".py"},
+    {type:"fill",question:"Java source file extension is ______.",answer:".java"},
+
+    {type:"single",question:"Which operator is used for comparison in Python?",options:["=","==","!=","<>"],answer:"=="},
+    {type:"single",question:"Which data type stores characters in C?",options:["int","float","char","string"],answer:"char"},
+    {type:"single",question:"Which keyword is used to create object in Java?",options:["new","create","object","init"],answer:"new"},
+    {type:"multi",question:"Which are Python loops?",options:["for","while","loop","do-while"],answer:["for","while"]},
+    {type:"fill",question:"In Java, ______ method is the entry point.",answer:"main"}
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+function loadQuestion() {
+    const q = quizData[currentQuestion];
+    document.getElementById("question").innerText = `Q${currentQuestion+1}. ${q.question}`;
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    if (q.type === "single") {
+        q.options.forEach(opt => {
+            optionsDiv.innerHTML += `
+                <div class="option">
+                    <input type="radio" name="answer" value="${opt}"> ${opt}
+                </div>`;
+        });
+    }
+
+    else if (q.type === "multi") {
+        q.options.forEach(opt => {
+            optionsDiv.innerHTML += `
+                <div class="option">
+                    <input type="checkbox" value="${opt}"> ${opt}
+                </div>`;
+        });
+    }
+
+    else if (q.type === "fill") {
+        optionsDiv.innerHTML = `<input type="text" id="fillAnswer" placeholder="Type your answer">`;
+    }
+}
+
+function nextQuestion() {
+    const q = quizData[currentQuestion];
+    let userAnswer;
+
+    if (q.type === "single") {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        if (!selected) return alert("Please select an answer!");
+        if (selected.value === q.answer) score++;
+    }
+
+    else if (q.type === "multi") {
+        const selected = document.querySelectorAll('input[type="checkbox"]:checked');
+        if (selected.length === 0) return alert("Select at least one!");
+        userAnswer = Array.from(selected).map(el => el.value);
+        if (JSON.stringify(userAnswer.sort()) === JSON.stringify(q.answer.sort())) score++;
+    }
+
+    else if (q.type === "fill") {
+        userAnswer = document.getElementById("fillAnswer").value.toLowerCase().trim();
+        if (!userAnswer) return alert("Enter your answer!");
+        if (userAnswer === q.answer) score++;
+    }
+
+    currentQuestion++;
+
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>🎉 Quiz Completed!</h2>
+            <div id="result">Your Score: ${score} / ${quizData.length}</div>
+            <button onclick="location.reload()">Restart Quiz</button>
+        `;
+    }
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
